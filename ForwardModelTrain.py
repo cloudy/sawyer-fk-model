@@ -13,6 +13,7 @@ from keras.models import Sequential
 from keras.layers import Activation
 from keras.layers import Dense
 from keras import optimizers
+from keras.utils import multi_gpu_model
 
 # Define the path of the data
 training_file='UniformedForwardModelData3.txt'
@@ -43,10 +44,12 @@ forwardModel.add(Dense(300,init="uniform",activation="sigmoid"))
 forwardModel.add(Dense(3))
 
 # Define the Training Process
-forwardModel.compile(optimizer='adam',loss='mse',metrics=['accuracy'])
+parallel_model = multi_gpu_model(forwardModel, gpus=4)
+parallel_model.compile(optimizer='adam',loss='mse',metrics=['accuracy']) 
+#forwardModel.compile(optimizer='adam',loss='mse',metrics=['accuracy'])
 
 # Train the Model
-forwardModel.fit(input_training_data,output_training_data,validation_split=0.2,batch_size=256, epochs=10)
+parallel_model.fit(input_training_data,output_training_data,validation_split=0.2,batch_size=256, epochs=10)
 
 # Save the Model
 forwardModel.save(model_file)
