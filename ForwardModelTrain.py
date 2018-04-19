@@ -37,7 +37,7 @@ def main():
             pmodel = multi_gpu_model(model, gpus=num_gpus)
         
         pmodel.compile(optimizer='adam',loss='mse',metrics=['accuracy']) 
-        pmodel.fit(input_training_data,output_training_data,validation_split=0.2,batch_size=256, epochs=10)
+        pmodel.fit(input_training_data,output_training_data,validation_split=0.2,batch_size=1024, epochs=10)
         model.summary()
         with open(model_file + '_' + training_file.split('_')[-1].split('.')[0] + '_summary.txt', 'w') as model_sum_file: 
             model_sum_file.write(str(model.to_json()))
