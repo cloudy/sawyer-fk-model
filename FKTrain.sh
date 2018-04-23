@@ -5,5 +5,6 @@ source /setups/setup_cuda-8.0.sh
 workon nntest
 
 cd /home/cloud/code/sawyer_fk_model/
+python GeneralizedFKTrain.sh
 #python ForwardModelTrain.py
-python FKHyperParmOptimization.py
+#python FKHyperParmOptimization.py

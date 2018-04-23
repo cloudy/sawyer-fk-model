@@ -19,7 +19,7 @@ num_gpus = len(device_lib.list_local_devices()) - 1
 if len(sys.argv) > 2:
     num_gpus = min(int(sys.argv[1]), num_gpus)
 
-training_files= glob.glob('/data/cloud/sawyer_fk_data/sawyer_fk_learning/7DOF/data/*.txt') #'data/ufmdata_1.txt'
+training_files= ['/data/cloud/sawyer_fk_data/sawyer_fk_learning/7DOF/data/UFMD7_1M.txt'] #glob.glob('/data/cloud/sawyer_fk_data/sawyer_fk_learning/7DOF/data/*.txt') #'data/ufmdata_1.txt'
 model_file='models/forwardmodel'
 
 def main():
@@ -28,9 +28,10 @@ def main():
 
         # Dataset to learn the forward kinematics of the Sawyer Robot. Position Prediction only
         training_data=np.loadtxt(training_file,delimiter=',')
-        input_training_data = training_data[:7] 
-        output_training_data = training_data[7:] 
-        
+        input_training_data = training_data[:,:7] 
+        output_training_data = training_data[:,7:] 
+        print(input_training_data.shape)
+        print(output_training_data.shape)
         # Training, across multiple GPUs if selected/available
         pmodel = model = model_builder()
         if (num_gpus > 1):
