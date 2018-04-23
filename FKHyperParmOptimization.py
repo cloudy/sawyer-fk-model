@@ -1,4 +1,4 @@
-#/usr/bin/env python
+#/usr/bin/env python3
 
 # Training the forward kinematic model of the Sawyer Robot
 import glob
