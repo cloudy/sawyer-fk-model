@@ -1,6 +1,6 @@
 #/usr/bin/env python3
 
-# Training the forward kinematic model of the Sawyer Robot
+# Training the forward kinematic model of the Sawyer Robot (All 7DOF)
 import glob
 import sys
 import numpy as np
@@ -19,7 +19,7 @@ num_gpus = len(device_lib.list_local_devices()) - 1
 if len(sys.argv) > 2:
     num_gpus = min(int(sys.argv[1]), num_gpus)
 
-training_files= ['/data/cloud/sawyer_fk_data/sawyer_fk_learning/7DOF/data/UFMD7_1M.txt'] #glob.glob('/data/cloud/sawyer_fk_data/sawyer_fk_learning/7DOF/data/*.txt') #'data/ufmdata_1.txt'
+training_files= glob.glob('/data/cloud/sawyer_fk_data/sawyer_fk_learning/7DOF/data/*.txt')
 model_file='models/forwardmodel'
 
 def main():
@@ -29,7 +29,7 @@ def main():
         # Dataset to learn the forward kinematics of the Sawyer Robot. Position Prediction only
         training_data=np.loadtxt(training_file,delimiter=',')
         input_training_data = training_data[:,:7] 
-        output_training_data = training_data[:,7:] 
+        output_training_data = training_data[:,7:] # Issues learning YPR, XYZ fine though
         print(input_training_data.shape)
         print(output_training_data.shape)
         # Training, across multiple GPUs if selected/available
@@ -38,23 +38,20 @@ def main():
             pmodel = multi_gpu_model(model, gpus=num_gpus)
         
         pmodel.compile(optimizer='adam',loss='mse',metrics=['accuracy']) 
-        pmodel.fit(input_training_data,output_training_data,validation_split=0.2,batch_size=256, epochs=10)
+        pmodel.fit(input_training_data, output_training_data, validation_split=0.2, batch_size=256*num_gpus, epochs=30)
         model.summary()
         with open(model_file + '_' + training_file.split('/')[-1].split('.')[0] + '_summary.txt', 'w') as model_sum_file: 
             model_sum_file.write(str(model.to_json()))
         model.save(model_file + '_' + training_file.split('/')[-1].split('.')[0] + '.h5')
 
-    # Define the Model
-def model_builder():
+def model_builder(numhiddenlayers = 4, init_mode = 'uniform', neurons = [400, 400, 300, 300, 400, 400, 300, 200, 200, 100]):
     Model = Sequential()
-    Model.add(Dense(500, input_shape=(7,), kernel_initializer="uniform", activation="sigmoid"))
-    Model.add(Dense(500, kernel_initializer="uniform", activation="sigmoid"))
-    Model.add(Dense(400, kernel_initializer="uniform", activation="sigmoid"))
-    Model.add(Dense(400, kernel_initializer="uniform", activation="sigmoid"))
-    Model.add(Dense(300, kernel_initializer="uniform", activation="sigmoid"))
-    Model.add(Dense(200, kernel_initializer="uniform", activation="sigmoid"))
+    Model.add(Dense(500, input_shape=(7,), kernel_initializer=init_mode, activation="sigmoid"))
+    for i in range(0, numhiddenlayers):
+        Model.add(Dense(neurons[i], kernel_initializer=init_mode, activation="sigmoid"))
     Model.add(Dense(6))
     return Model
+
 
 if __name__ == '__main__':
 	main()
