@@ -7,6 +7,7 @@ init_mode = ['uniform', 'lecun_uniform', 'normal', 'zero', 'glorot_normal', 'glo
 learn_rate = [0.001, 0.01, 0.1, 0.2, 0.3]
 momentum = [0.0, 0.2, 0.4, 0.6, 0.8, 0.9]
 
-param_grid = dict(numhiddenlayers = numhiddenlayers, neurons=neurons, init_mode=init_mode, learn_rate=learn_rate, momentum=momentum)
+#param_grid = dict(numhiddenlayers = numhiddenlayers, neurons=neurons, init_mode=init_mode, learn_rate=learn_rate, momentum=momentum)
+param_grid = dict(numhiddenlayers = [3], neurons=neurons, init_mode=['uniform', 'zero'])
 
 

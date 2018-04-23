@@ -1,12 +1,10 @@
-#!/usr/bin/env python
+#/usr/bin/env python
 
 # Training the forward kinematic model of the Sawyer Robot
 import glob
 import sys
 import numpy as np
 import tensorflow as tf
-from keras.layers import Lambda, concatenate
-from keras import Model
 from keras.models import Sequential
 from keras.layers import Activation
 from keras.layers import Dense
@@ -15,6 +13,7 @@ from keras.wrappers.scikit_learn import KerasRegressor
 
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import KFold, cross_val_score
+from sklearn.metrics import mean_squared_error
 
 from hyperparams import param_grid
 
@@ -38,7 +37,7 @@ def main():
 
         model.fit(X, y)
         prediction = model.predict(X_test)
-        accuracy_score(Y_test, prediction)
+        mean_squared_error(y_test, prediction)
         
         #model.fit(input_training_data, output_training_data, validation_split = 0.2, batch_size = 1024, epochs = 10)
         #model.summary()
