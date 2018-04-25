@@ -4,3 +4,5 @@ data/*
 *.pyc
 *.e*
 *.o*
+models/*
+!models/.gitkeep
