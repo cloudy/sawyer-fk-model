@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 plt.rcParams.update({'figure.max_open_warning': 0})
 
-optimizers.Adam(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+#optimizers.Adam(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
 # TODO: Get batch loading, or threaded loading
 # TODO: investigate LR
@@ -56,7 +56,7 @@ def main():
 
         save_plots([plot_performance(hist.history, filebase)], filebase + '_plot.pdf')
 
-def model_builder(numhiddenlayers = 5, init_mode = 'uniform', neurons = [500, 400, 400, 300, 300, 200, 200]):
+def model_builder(numhiddenlayers = 4, init_mode = 'uniform', neurons = [500, 400, 400, 300, 300, 200, 200]):
     Model = Sequential()
     Model.add(Dense(neurons[0], input_shape=(7,), kernel_initializer=init_mode, activation="sigmoid"))
     for i in range(0, numhiddenlayers):
