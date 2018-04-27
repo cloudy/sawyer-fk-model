@@ -13,7 +13,7 @@ from keras.layers import Activation
 from keras.layers import Dense
 from keras import optimizers
 from keras.utils import multi_gpu_model
-
+from natsort import natsorted
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt 
@@ -29,7 +29,8 @@ num_gpus = len(device_lib.list_local_devices()) - 1
 if len(sys.argv) > 2:
     num_gpus = min(int(sys.argv[1]), num_gpus)
 
-training_files= sorted(glob.glob('/home/michail/sawyer_fk_learning/4DOF/data/*.txt'))
+training_files= natsorted(glob.glob('/data/cloud/sawyer_fk_data/new_data/sawyer_fk_learning/7DOF/data/*.txt'))[20:]
+#training_files= sorted(glob.glob('/home/michail/sawyer_fk_learning/4DOF/data/*.txt'))
 model_file='models/forwardmodel'
 
 def main():
@@ -56,7 +57,7 @@ def main():
 
         save_plots([plot_performance(hist.history, filebase)], filebase + '_plot.pdf')
 
-def model_builder(numhiddenlayers = 4, init_mode = 'uniform', neurons = [500, 400, 400, 300, 300, 200, 200]):
+def model_builder(numhiddenlayers = 4, init_mode = 'uniform', neurons = [800, 600, 600, 400, 400, 200, 200]):
     Model = Sequential()
     Model.add(Dense(neurons[0], input_shape=(7,), kernel_initializer=init_mode, activation="sigmoid"))
     for i in range(0, numhiddenlayers):
