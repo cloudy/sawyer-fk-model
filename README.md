@@ -25,3 +25,22 @@ For example, you have file1.txt stored in /home/username/dir,
 and you want to move it to /home/username/dir2/dir4/ on `heracleiadl`.
 
 The scp command to do this is `scp /home/username/dir/file1.txt username@192.168.1.27:/home/username/dir2/dir4`
+
+
+## Using screen
+
+On the `heracleiadl` machine, train in `screen` so you can check progress at will and let it continue 
+running once you end your ssh connection.
+
+Instructions:
+
+- `ssh -XY username@192.168.1.27`
+- set up new screen session: `screen -S YOURSCREENNAME`
+- This will launch the screen session, in it you can start training.
+- Example: `workon nntest && python GeneralizedFKTrain.py`
+- To exit `screen` without killing it, press this keyboard combo: Ctrl+a+d
+- To reconnect to a `screen` session: `screen -x`
+- If there are multiple sessions available, `screen -x SESSIONIDNUMBER`
+- To exit a screen session (kill it), enter screen session and enter: `exit`.
+
+

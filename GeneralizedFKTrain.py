@@ -29,7 +29,7 @@ num_gpus = len(device_lib.list_local_devices()) - 1
 if len(sys.argv) > 2:
     num_gpus = min(int(sys.argv[1]), num_gpus)
 
-training_files= sorted(glob.glob('/home/michail/sawyer_fk_learning/7DOF/data/*.txt'))
+training_files= sorted(glob.glob('/home/michail/sawyer_fk_learning/4DOF/data/*.txt'))
 model_file='models/forwardmodel'
 
 def main():
