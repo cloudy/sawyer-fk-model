@@ -14,6 +14,8 @@ from keras.layers import Dense
 from keras import optimizers
 from keras.utils import multi_gpu_model
 from natsort import natsorted
+import utils.dataloaders as dl
+
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt 
@@ -22,47 +24,51 @@ plt.rcParams.update({'figure.max_open_warning': 0})
 
 #optimizers.Adam(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
-# TODO: Get batch loading, or threaded loading
 # TODO: investigate LR
+
 # Select number of gpus, will only use what is available if requesting more than available
 num_gpus = len(device_lib.list_local_devices()) - 1 
 if len(sys.argv) > 2:
     num_gpus = min(int(sys.argv[1]), num_gpus)
 
-training_files= natsorted(glob.glob('/data/cloud/sawyer_fk_data/new_data/sawyer_fk_learning/7DOF/data/*.txt'))[20:]
-#training_files= sorted(glob.glob('/home/michail/sawyer_fk_learning/4DOF/data/*.txt'))
+training_files= natsorted(glob.glob('/data/sawyer_fk_data/7DOF/*.txt'))[20:]
+#training_files= natsorted(glob.glob('/data/cloud/sawyer_fk_data/new_data/sawyer_fk_learning/7DOF/data/*.txt'))[20:]
+#training_files= natsorted(glob.glob('/home/michail/sawyer_fk_learning/4DOF/data/*.txt'))
 model_file='models/forwardmodel'
+
+DOF = 4
+POSOR = 3
+EPOCHS = 30
 
 def main():
     for training_file in training_files:
         print("Initializing training for: ", training_file)
         filebase = model_file + '_' + training_file.split('/')[-1].split('.')[0] 
-        # Dataset to learn the forward kinematics of the Sawyer Robot. Position Prediction only
-        training_data=np.loadtxt(training_file,delimiter=',')
-        input_training_data = training_data[:,:7] 
-        output_training_data = training_data[:,7:] # Issues learning YPR, XYZ fine though
-        print(input_training_data.shape)
-        print(output_training_data.shape)
+        
         # Training, across multiple GPUs if selected/available
         pmodel = model = model_builder()
         if (num_gpus > 1):
             pmodel = multi_gpu_model(model, gpus=num_gpus)
         
         pmodel.compile(optimizer='adam',loss='mse',metrics=['accuracy']) 
-        hist = pmodel.fit(input_training_data, output_training_data, validation_split=0.2, batch_size=256*num_gpus, epochs=30)
         model.summary()
+
+        steps_cnt = dl.file_len(training_file)/EPOCHS/(256*num_gpus) 
+        hist = pmodel.fit_generator(dl.data_generator(training_file, nb_epochs=EPOCHS, dof=DOF, posor=POSOR), 
+                steps_per_epoch=0.8*steps_cnt, 
+                validation_steps=0.2*steps_cnt, epochs=EPOCHS)
+        
         with open( filebase + '_summary.txt', 'w') as model_sum_file: 
             model_sum_file.write(str(model.to_json()))
         model.save( filebase + '.h5')
-
         save_plots([plot_performance(hist.history, filebase)], filebase + '_plot.pdf')
 
-def model_builder(numhiddenlayers = 4, init_mode = 'uniform', neurons = [800, 600, 600, 400, 400, 200, 200]):
+def model_builder(numhiddenlayers = 3, init_mode = 'uniform', neurons = [400, 300, 200, 100, 50, 200, 200], acti= 'relu'):
     Model = Sequential()
-    Model.add(Dense(neurons[0], input_shape=(7,), kernel_initializer=init_mode, activation="sigmoid"))
+    Model.add(Dense(neurons[0], input_shape=(DOF,), kernel_initializer=init_mode, activation=acti))
     for i in range(0, numhiddenlayers):
-        Model.add(Dense(neurons[i + 1], kernel_initializer=init_mode, activation="sigmoid"))
-    Model.add(Dense(6))
+        Model.add(Dense(neurons[i + 1], kernel_initializer=init_mode, activation=acti))
+    Model.add(Dense(POSOR))
     return Model
 
 def plot_performance(hist, ptitle):
