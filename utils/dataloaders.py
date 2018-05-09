@@ -10,17 +10,21 @@ def file_len(fname):
         raise IOError(err)    
     return int(result.strip().split()[0])
 
-
-def data_generator(fname, nb_epochs = 10, dof = 7, posor = 6, dofoffset = 7):
-    chunk_size = file_len(fname) // nb_epochs
+# dropcols
+def data_generator(fname, batchsize = 256, dof = 7, posor = 6, dofoffset = 7, dropcol = None):
     f = open(fname)
-    
+    flen = file_len(fname)
+    i = 0
     while True:
-        chunk = np.array([np.fromstring(f.readline(), sep=',') for _ in range(chunk_size)])
-        if not chunk.any():
+        chunk = np.array([np.fromstring(f.readline(), sep=',') for _ in range(batchsize)])
+        if i >= flen:
             break
-        
-        yield (chunk[:,:dof], chunk[:,dofoffset: dofoffset + posor])
+        i += batchsize
+        res = (chunk[:,:dof], chunk[:,dofoffset: dofoffset + posor])  
+        #print(res[0], end='\n\n')
+        #print("Shape: ", res[0].shape) 
+
+        yield res 
 
 
 
